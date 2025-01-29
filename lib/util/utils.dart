@@ -18,7 +18,8 @@ class Reusable {
     );
   }
 
-  static TextFormField customField(String label) {
+  static TextFormField customField(
+      String label, TextEditingController controller) {
     return TextFormField(
       keyboardType: (label.toLowerCase() == "price")
           ? TextInputType.number
@@ -30,6 +31,7 @@ class Reusable {
         focusedBorder: focus_border(),
         enabledBorder: border(),
       ),
+      controller: controller,
     );
   }
 

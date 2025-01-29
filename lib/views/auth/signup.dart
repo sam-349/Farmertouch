@@ -11,6 +11,10 @@ class SignUp extends StatefulWidget {
 }
 
 class _SignUpState extends State<SignUp> {
+  TextEditingController email = TextEditingController();
+  TextEditingController password = TextEditingController();
+  TextEditingController confirm = TextEditingController();
+
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
@@ -44,15 +48,15 @@ class _SignUpState extends State<SignUp> {
               SizedBox(
                 height: height / 5,
               ),
-              Reusable.customField("Email"),
+              Reusable.customField("Email", email),
               SizedBox(
                 height: 20,
               ),
-              Reusable.customField("password"),
+              Reusable.customField("password", password),
               SizedBox(
                 height: 20,
               ),
-              Reusable.customField("Confirm Password"),
+              Reusable.customField("Confirm Password", confirm),
               SizedBox(
                 height: 20,
               ),

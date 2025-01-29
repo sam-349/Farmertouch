@@ -16,6 +16,9 @@ class _SellState extends State<Sell> {
     "Sugarcane Trading",
   ];
 
+  TextEditingController quantity = TextEditingController();
+  TextEditingController price = TextEditingController();
+
   @override
   Widget build(BuildContext context) {
     final width = MediaQuery.of(context).size.width;
@@ -119,7 +122,7 @@ class _SellState extends State<Sell> {
                   Container(
                     height: 60,
                     width: width / 3,
-                    child: Reusable.customField("Quantity"),
+                    child: Reusable.customField("Quantity", quantity),
                   ),
                   SizedBox(
                     width: 20,
@@ -127,7 +130,7 @@ class _SellState extends State<Sell> {
                   Container(
                     height: 60,
                     width: width / 2.5,
-                    child: Reusable.customField("Price"),
+                    child: Reusable.customField("Price", price),
                   ),
                 ],
               ),

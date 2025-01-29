@@ -12,6 +12,9 @@ class Login extends StatefulWidget {
 }
 
 class _LoginState extends State<Login> {
+  TextEditingController email = TextEditingController();
+  TextEditingController password = TextEditingController();
+
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
@@ -44,11 +47,11 @@ class _LoginState extends State<Login> {
             mainAxisAlignment: MainAxisAlignment.center,
             crossAxisAlignment: CrossAxisAlignment.center,
             children: [
-              Reusable.customField("Email"),
+              Reusable.customField("Email", email),
               SizedBox(
                 height: 20,
               ),
-              Reusable.customField("Password"),
+              Reusable.customField("Password", password),
               SizedBox(
                 height: 20,
               ),

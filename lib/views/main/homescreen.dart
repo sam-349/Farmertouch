@@ -11,6 +11,8 @@ import 'package:geocoding/geocoding.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
 
+import '../../models/blog_model.dart';
+
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
 
@@ -29,31 +31,69 @@ class _HomeScreenState extends State<HomeScreen> {
   List<String> grid_text = [
     "Crop",
     "Livestock",
-    "Equipment",
-    "Consulting",
+    "AI",
     "Training",
+    "Finance",
     "Soil",
-    "Harvest",
-    "Regulatory",
-    "Transport",
-    "Analysis",
-    "Account",
-    "Financial",
+    // "Harvest",
+    // "Regulatory",
+    // "Transport",
+    // "Analysis",
+    // "Account",
+    // "Financial",
+  ];
+
+  List<Blog> blogs = [
+    Blog(
+      img:
+          'https://images.pexels.com/photos/1719669/pexels-photo-1719669.jpeg?auto=compress&cs=tinysrgb&w=600',
+      title: 'The Importance of Crop Rotation for Soil Health',
+      content:
+          'Crop rotation is a time-tested method that helps maintain soil fertility and reduces pest buildup. By rotating crops, farmers can prevent soil degradation and increase yield over timeldiihg;pbosdiyrgbs;oihg;ositgh;osithg;oirgh;oirtg rstriogho;rigtih ;oihrt oihstg oihrtrg;oitgoihtgoih trgoihtoi...',
+    ),
+    Blog(
+      img:
+          'https://images.pexels.com/photos/30437418/pexels-photo-30437418/free-photo-of-young-green-plant-sprout-emerging-from-soil.jpeg?auto=compress&cs=tinysrgb&w=600',
+      title: 'The Benefits of Organic Farming for Sustainable Agriculture',
+      content:
+          'Organic farming practices focus on sustainability, using natural fertilizers and crop protection methods. This approach not only improves soil health but also reduces the environmental impact of agriculture...',
+    ),
+    Blog(
+      img:
+          'https://images.pexels.com/photos/10606633/pexels-photo-10606633.jpeg?auto=compress&cs=tinysrgb&w=600',
+      title: 'How Drip Irrigation Can Save Water and Boost Yields',
+      content:
+          'Drip irrigation is an efficient way to deliver water directly to the roots of plants, reducing water wastage and improving crop growth. Learn how this technique is helping farmers use water more efficiently...',
+    ),
+    Blog(
+      img:
+          'https://images.pexels.com/photos/10592983/pexels-photo-10592983.jpeg?auto=compress&cs=tinysrgb&w=600',
+      title: 'Exploring Precision Farming for Increased Efficiency',
+      content:
+          'Precision farming uses technology such as GPS and sensors to optimize farming practices. By monitoring soil health, moisture levels, and crop growth, farmers can make data-driven decisions that increase productivity...',
+    ),
+    Blog(
+      img:
+          'https://images.pexels.com/photos/2589457/pexels-photo-2589457.jpeg?auto=compress&cs=tinysrgb&w=600',
+      title: 'Sustainable Agriculture Practices for the Future',
+      content:
+          'Sustainable farming practices are key to feeding a growing population while protecting the environment. Discover techniques that help conserve resources, improve biodiversity, and ensure long-term agricultural viability...',
+    ),
   ];
 
   List<String> grid_images = [
     "https://cdn-icons-png.freepik.com/256/6089/6089661.png?ga=GA1.1.1483351532.1733847503&semt=ais_hybrid",
     "https://cdn-icons-png.freepik.com/256/3319/3319363.png?ga=GA1.1.1483351532.1733847503&semt=ais_hybrid",
-    "https://cdn-icons-png.freepik.com/256/14087/14087122.png?ga=GA1.1.1483351532.1733847503&semt=ais_hybrid",
-    "https://cdn-icons-png.freepik.com/256/5024/5024800.png?ga=GA1.1.1483351532.1733847503&semt=ais_hybrid",
+    "https://img.freepik.com/premium-vector/artificial-intelligence-vector-illustration_1237743-62154.jpg?ga=GA1.1.1483351532.1733847503&semt=ais_hybrid",
+    // "https://cdn-icons-png.freepik.com/256/5024/5024800.png?ga=GA1.1.1483351532.1733847503&semt=ais_hybrid",
     "https://cdn-icons-png.freepik.com/256/1376/1376421.png?ga=GA1.1.1483351532.1733847503&semt=ais_hybrid",
-    "https://cdn-icons-png.freepik.com/256/18007/18007373.png?ga=GA1.1.1483351532.1733847503&semt=ais_hybrid",
-    "https://cdn-icons-png.freepik.com/256/4832/4832398.png?ga=GA1.1.1483351532.1733847503&semt=ais_hybrid",
-    "https://cdn-icons-png.freepik.com/256/18619/18619584.png?ga=GA1.1.1483351532.1733847503&semt=ais_hybrid",
-    "https://cdn-icons-png.freepik.com/256/11845/11845726.png?ga=GA1.1.1483351532.1733847503&semt=ais_hybrid",
-    "https://cdn-icons-png.freepik.com/256/3703/3703299.png?ga=GA1.1.1483351532.1733847503&semt=ais_hybrid",
-    "https://cdn-icons-png.freepik.com/256/17515/17515464.png?ga=GA1.1.1483351532.1733847503&semt=ais_hybrid",
     "https://cdn-icons-png.freepik.com/256/2953/2953423.png?ga=GA1.1.1483351532.1733847503&semt=ais_hybrid",
+    "https://cdn-icons-png.freepik.com/256/18007/18007373.png?ga=GA1.1.1483351532.1733847503&semt=ais_hybrid",
+    // "https://cdn-icons-png.freepik.com/256/4832/4832398.png?ga=GA1.1.1483351532.1733847503&semt=ais_hybrid",
+    // "https://cdn-icons-png.freepik.com/256/18619/18619584.png?ga=GA1.1.1483351532.1733847503&semt=ais_hybrid",
+    // "https://cdn-icons-png.freepik.com/256/11845/11845726.png?ga=GA1.1.1483351532.1733847503&semt=ais_hybrid",
+    // "https://cdn-icons-png.freepik.com/256/3703/3703299.png?ga=GA1.1.1483351532.1733847503&semt=ais_hybrid",
+    // "https://cdn-icons-png.freepik.com/256/17515/17515464.png?ga=GA1.1.1483351532.1733847503&semt=ais_hybrid",
   ];
 
   Address? cur_address;
@@ -350,8 +390,86 @@ class _HomeScreenState extends State<HomeScreen> {
                     },
                   ),
                   SizedBox(
-                    height: 50,
+                    height: 20,
                   ),
+                  Row(
+                    children: [
+                      Text(
+                        "Blogs",
+                        style: theme.textTheme.displayLarge,
+                      ),
+                    ],
+                  ),
+                  SizedBox(height: 20),
+                  ...blogs
+                      .map(
+                        (blog) => Container(
+                          padding: EdgeInsets.all(10),
+                          margin: EdgeInsets.symmetric(vertical: 10),
+                          decoration: BoxDecoration(
+                              color: ColorsUtil.onPrimary,
+                              borderRadius: BorderRadius.circular(10),
+                              boxShadow: [
+                                BoxShadow(
+                                  color: Colors.grey.shade300,
+                                  blurRadius: 2,
+                                  spreadRadius: 5,
+                                )
+                              ]),
+                          child: Row(
+                            children: [
+                              // Image Container (leading)
+                              Container(
+                                height: 100,
+                                width: 100,
+                                decoration: BoxDecoration(
+                                  // color: Colors.red,
+                                  borderRadius: BorderRadius.circular(360),
+                                ),
+                                child: ClipRRect(
+                                  borderRadius: BorderRadius.circular(360),
+                                  child: Image.network(
+                                    blog.img,
+                                    errorBuilder: (context, error, stackTrace) {
+                                      return Center(child: Text("img"));
+                                    },
+                                    fit: BoxFit.cover,
+                                  ),
+                                ),
+                              ),
+                              // Spacer to provide some space between the image and text
+                              SizedBox(width: 16),
+
+                              // Column to display title and content
+                              Expanded(
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    // Title
+                                    Padding(
+                                      padding:
+                                          const EdgeInsets.only(bottom: 8.0),
+                                      child: Text(
+                                        blog.title,
+                                        maxLines: 3,
+                                        overflow: TextOverflow.ellipsis,
+                                        style: theme.textTheme.displayLarge,
+                                      ),
+                                    ),
+                                    // Subtitle / Content
+                                    Text(
+                                      blog.content,
+                                      maxLines: 6,
+                                      overflow: TextOverflow.ellipsis,
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      )
+                      .toList()
                 ],
               ),
             ),
