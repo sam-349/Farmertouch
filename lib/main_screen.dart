@@ -1,4 +1,5 @@
 import 'package:farmers_touch/views/main/account.dart';
+import 'package:farmers_touch/views/main/blog_add.dart';
 import 'package:farmers_touch/views/main/buy_sell.dart';
 import 'package:farmers_touch/views/main/homescreen.dart';
 import 'package:farmers_touch/views/main/news.dart';
@@ -27,6 +28,10 @@ class _MainScreenState extends State<MainScreen> {
       icon: Icon(Icons.padding_outlined),
     ),
     BottomNavigationBarItem(
+      label: "Add Blog",
+      icon: Icon(Icons.add),
+    ),
+    BottomNavigationBarItem(
       label: "Account",
       icon: Icon(Icons.account_circle_outlined),
     )
@@ -36,6 +41,7 @@ class _MainScreenState extends State<MainScreen> {
     HomeScreen(),
     BuySell(),
     News(),
+    BlogAdd(),
     Account(),
   ];
 

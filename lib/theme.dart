@@ -24,6 +24,15 @@ ThemeData theme = ThemeData(
       fontSize: 14,
       color: ColorsUtil.onPrimary,
     ),
+    bodyMedium: TextStyle(
+      fontSize: 17,
+      color: ColorsUtil.txtColor,
+    ),
   ),
-  // elevatedButtonTheme: ElevatedButtonThemeData
+  elevatedButtonTheme: ElevatedButtonThemeData(
+    style: ElevatedButton.styleFrom(
+      backgroundColor: ColorsUtil.primaryColor,
+      foregroundColor: ColorsUtil.onPrimary,
+    ),
+  ),
 );

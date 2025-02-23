@@ -3,6 +3,8 @@ import 'package:farmers_touch/colors.dart';
 import 'package:farmers_touch/models/address_model.dart';
 import 'package:farmers_touch/models/weather_model.dart';
 import 'package:farmers_touch/util/utils.dart';
+import 'package:farmers_touch/views/main/ai.dart';
+import 'package:farmers_touch/views/main/blog_details.dart';
 import 'package:farmers_touch/views/main/chat_screen.dart';
 import 'package:farmers_touch/views/main/chatbot.dart';
 import 'package:flutter/material.dart';
@@ -33,8 +35,8 @@ class _HomeScreenState extends State<HomeScreen> {
     "Livestock",
     "AI",
     "Training",
-    "Finance",
-    "Soil",
+    // "Finance",
+    // "Soil",
     // "Harvest",
     // "Regulatory",
     // "Transport",
@@ -87,8 +89,8 @@ class _HomeScreenState extends State<HomeScreen> {
     "https://img.freepik.com/premium-vector/artificial-intelligence-vector-illustration_1237743-62154.jpg?ga=GA1.1.1483351532.1733847503&semt=ais_hybrid",
     // "https://cdn-icons-png.freepik.com/256/5024/5024800.png?ga=GA1.1.1483351532.1733847503&semt=ais_hybrid",
     "https://cdn-icons-png.freepik.com/256/1376/1376421.png?ga=GA1.1.1483351532.1733847503&semt=ais_hybrid",
-    "https://cdn-icons-png.freepik.com/256/2953/2953423.png?ga=GA1.1.1483351532.1733847503&semt=ais_hybrid",
-    "https://cdn-icons-png.freepik.com/256/18007/18007373.png?ga=GA1.1.1483351532.1733847503&semt=ais_hybrid",
+    // "https://cdn-icons-png.freepik.com/256/2953/2953423.png?ga=GA1.1.1483351532.1733847503&semt=ais_hybrid",
+    // "https://cdn-icons-png.freepik.com/256/18007/18007373.png?ga=GA1.1.1483351532.1733847503&semt=ais_hybrid",
     // "https://cdn-icons-png.freepik.com/256/4832/4832398.png?ga=GA1.1.1483351532.1733847503&semt=ais_hybrid",
     // "https://cdn-icons-png.freepik.com/256/18619/18619584.png?ga=GA1.1.1483351532.1733847503&semt=ais_hybrid",
     // "https://cdn-icons-png.freepik.com/256/11845/11845726.png?ga=GA1.1.1483351532.1733847503&semt=ais_hybrid",
@@ -221,7 +223,7 @@ class _HomeScreenState extends State<HomeScreen> {
         centerTitle: true,
         actions: [
           Icon(
-            Icons.notifications_active,
+            Icons.shopping_cart_rounded,
             color: ColorsUtil.onPrimary,
           ),
           SizedBox(
@@ -340,54 +342,64 @@ class _HomeScreenState extends State<HomeScreen> {
               padding: const EdgeInsets.symmetric(horizontal: 20.0),
               child: Column(
                 children: [
+                  GridView.builder(
+                    shrinkWrap: true,
+                    physics: NeverScrollableScrollPhysics(),
+                    itemCount: grid_text.length,
+                    gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                      crossAxisCount: 2,
+                      mainAxisSpacing: 10,
+                      crossAxisSpacing: 10,
+                    ),
+                    itemBuilder: (context, ind) {
+                      return GestureDetector(
+                        onTap: () {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) => AI(),
+                            ),
+                          );
+                        },
+                        child: Container(
+                          height: 70,
+                          width: 70,
+                          decoration: BoxDecoration(
+                            color: Colors.white,
+                            borderRadius: BorderRadius.circular(10),
+                          ),
+                          child: Column(
+                            children: [
+                              Spacer(),
+                              Container(
+                                height: 60,
+                                width: 60,
+                                decoration: BoxDecoration(
+                                  color: Colors.grey.shade300,
+                                ),
+                                child: Image.network(
+                                  grid_images[ind],
+                                  fit: BoxFit.cover,
+                                ),
+                              ),
+                              SizedBox(height: 5),
+                              Text(grid_text[ind]),
+                              Spacer(),
+                            ],
+                          ),
+                        ),
+                      );
+                    },
+                  ),
+                  SizedBox(
+                    height: 20,
+                  ),
                   Container(
                     height: 50,
                     width: width,
                     decoration:
                         BoxDecoration(borderRadius: BorderRadius.circular(360)),
                     child: Reusable.textField(),
-                  ),
-                  SizedBox(
-                    height: 20,
-                  ),
-                  GridView.builder(
-                    shrinkWrap: true,
-                    physics: NeverScrollableScrollPhysics(),
-                    itemCount: grid_text.length,
-                    gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                      crossAxisCount: 3,
-                      mainAxisSpacing: 10,
-                      crossAxisSpacing: 10,
-                    ),
-                    itemBuilder: (context, ind) {
-                      return Container(
-                        height: 100,
-                        width: 100,
-                        decoration: BoxDecoration(
-                          color: Colors.white,
-                          borderRadius: BorderRadius.circular(10),
-                        ),
-                        child: Column(
-                          children: [
-                            Spacer(),
-                            Container(
-                              height: 50,
-                              width: 50,
-                              decoration: BoxDecoration(
-                                color: Colors.grey.shade300,
-                              ),
-                              child: Image.network(
-                                grid_images[ind],
-                                fit: BoxFit.cover,
-                              ),
-                            ),
-                            SizedBox(height: 5),
-                            Text(grid_text[ind]),
-                            Spacer(),
-                          ],
-                        ),
-                      );
-                    },
                   ),
                   SizedBox(
                     height: 20,
@@ -403,69 +415,84 @@ class _HomeScreenState extends State<HomeScreen> {
                   SizedBox(height: 20),
                   ...blogs
                       .map(
-                        (blog) => Container(
-                          padding: EdgeInsets.all(10),
-                          margin: EdgeInsets.symmetric(vertical: 10),
-                          decoration: BoxDecoration(
-                              color: ColorsUtil.onPrimary,
-                              borderRadius: BorderRadius.circular(10),
-                              boxShadow: [
-                                BoxShadow(
-                                  color: Colors.grey.shade300,
-                                  blurRadius: 2,
-                                  spreadRadius: 5,
-                                )
-                              ]),
-                          child: Row(
-                            children: [
-                              // Image Container (leading)
-                              Container(
-                                height: 100,
-                                width: 100,
-                                decoration: BoxDecoration(
-                                  // color: Colors.red,
-                                  borderRadius: BorderRadius.circular(360),
-                                ),
-                                child: ClipRRect(
-                                  borderRadius: BorderRadius.circular(360),
-                                  child: Image.network(
-                                    blog.img,
-                                    errorBuilder: (context, error, stackTrace) {
-                                      return Center(child: Text("img"));
-                                    },
-                                    fit: BoxFit.cover,
+                        (blog) => GestureDetector(
+                          onTap: () {
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (context) => BlogDetails(
+                                    title: blog.title,
+                                    image: blog.img,
+                                    description: blog.content),
+                              ),
+                            );
+                          },
+                          child: Container(
+                            padding: EdgeInsets.all(10),
+                            margin: EdgeInsets.symmetric(vertical: 10),
+                            decoration: BoxDecoration(
+                                color: ColorsUtil.onPrimary,
+                                borderRadius: BorderRadius.circular(10),
+                                boxShadow: [
+                                  BoxShadow(
+                                    color: Colors.grey.shade300,
+                                    blurRadius: 2,
+                                    spreadRadius: 5,
+                                  )
+                                ]),
+                            child: Row(
+                              children: [
+                                // Image Container (leading)
+                                Container(
+                                  height: 100,
+                                  width: 100,
+                                  decoration: BoxDecoration(
+                                    // color: Colors.red,
+                                    borderRadius: BorderRadius.circular(360),
+                                  ),
+                                  child: ClipRRect(
+                                    borderRadius: BorderRadius.circular(360),
+                                    child: Image.network(
+                                      blog.img,
+                                      errorBuilder:
+                                          (context, error, stackTrace) {
+                                        return Center(child: Text("img"));
+                                      },
+                                      fit: BoxFit.cover,
+                                    ),
                                   ),
                                 ),
-                              ),
-                              // Spacer to provide some space between the image and text
-                              SizedBox(width: 16),
+                                // Spacer to provide some space between the image and text
+                                SizedBox(width: 16),
 
-                              // Column to display title and content
-                              Expanded(
-                                child: Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    // Title
-                                    Padding(
-                                      padding:
-                                          const EdgeInsets.only(bottom: 8.0),
-                                      child: Text(
-                                        blog.title,
-                                        maxLines: 3,
-                                        overflow: TextOverflow.ellipsis,
-                                        style: theme.textTheme.displayLarge,
+                                // Column to display title and content
+                                Expanded(
+                                  child: Column(
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
+                                    children: [
+                                      // Title
+                                      Padding(
+                                        padding:
+                                            const EdgeInsets.only(bottom: 8.0),
+                                        child: Text(
+                                          blog.title,
+                                          maxLines: 3,
+                                          overflow: TextOverflow.ellipsis,
+                                          style: theme.textTheme.displayLarge,
+                                        ),
                                       ),
-                                    ),
-                                    // Subtitle / Content
-                                    Text(
-                                      blog.content,
-                                      maxLines: 6,
-                                      overflow: TextOverflow.ellipsis,
-                                    ),
-                                  ],
+                                      // Subtitle / Content
+                                      Text(
+                                        blog.content,
+                                        maxLines: 6,
+                                        overflow: TextOverflow.ellipsis,
+                                      ),
+                                    ],
+                                  ),
                                 ),
-                              ),
-                            ],
+                              ],
+                            ),
                           ),
                         ),
                       )
