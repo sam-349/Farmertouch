@@ -7,6 +7,9 @@ import 'package:farmers_touch/views/main/ai.dart';
 import 'package:farmers_touch/views/main/blog_details.dart';
 import 'package:farmers_touch/views/main/chat_screen.dart';
 import 'package:farmers_touch/views/main/chatbot.dart';
+import 'package:farmers_touch/views/main/crop.dart';
+import 'package:farmers_touch/views/main/livestock.dart';
+import 'package:farmers_touch/views/main/training.dart';
 import 'package:flutter/material.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:geocoding/geocoding.dart';
@@ -96,6 +99,13 @@ class _HomeScreenState extends State<HomeScreen> {
     // "https://cdn-icons-png.freepik.com/256/11845/11845726.png?ga=GA1.1.1483351532.1733847503&semt=ais_hybrid",
     // "https://cdn-icons-png.freepik.com/256/3703/3703299.png?ga=GA1.1.1483351532.1733847503&semt=ais_hybrid",
     // "https://cdn-icons-png.freepik.com/256/17515/17515464.png?ga=GA1.1.1483351532.1733847503&semt=ais_hybrid",
+  ];
+
+  List<Widget> grid_screens = [
+    Crop(),
+    LiveStock(),
+    AI(),
+    Training(),
   ];
 
   Address? cur_address;
@@ -357,7 +367,7 @@ class _HomeScreenState extends State<HomeScreen> {
                           Navigator.push(
                             context,
                             MaterialPageRoute(
-                              builder: (context) => AI(),
+                              builder: (context) => grid_screens[ind],
                             ),
                           );
                         },
