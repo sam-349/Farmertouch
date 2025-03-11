@@ -2,7 +2,7 @@ import 'package:farmers_touch/colors.dart';
 import 'package:flutter/material.dart';
 
 class Reusable {
-  static Widget textField() {
+  static Widget textField(callback) {
     return TextField(
       decoration: InputDecoration(
         prefixIcon: Icon(Icons.search),
@@ -12,9 +12,10 @@ class Reusable {
         ),
         fillColor: ColorsUtil.onPrimary,
         filled: true,
-        hintText: "Search Service",
+        hintText: "Search Blogs",
         contentPadding: EdgeInsets.all(15),
       ),
+      onChanged: callback,
     );
   }
 
@@ -27,11 +28,17 @@ class Reusable {
       cursorColor: ColorsUtil.primaryColor,
       decoration: InputDecoration(
         label: Text(label),
+        labelStyle: TextStyle(
+          color: ColorsUtil.primaryColor,
+        ),
         border: border(),
         focusedBorder: focus_border(),
         enabledBorder: border(),
       ),
       controller: controller,
+      validator: (txt) {
+        if (txt!.trim().isEmpty) return "$label is required";
+      },
     );
   }
 

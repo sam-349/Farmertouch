@@ -1,14 +1,21 @@
+import 'dart:typed_data';
+
 import 'package:farmers_touch/colors.dart';
+import 'package:farmers_touch/models/blog_model.dart';
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
 
 class BlogDetails extends StatefulWidget {
-  final String image;
-  final String title;
-  final String description;
+  // final List<BlogImage> images;
+  // final String title;
+  // final String description;
+  final BlogModel blog;
   const BlogDetails(
-      {required this.title,
-      required this.image,
-      required this.description,
+      {
+      // {required this.title,
+      // required this.images,
+      // required this.description,
+      required this.blog,
       super.key});
 
   @override
@@ -20,6 +27,11 @@ class _BlogDetailsState extends State<BlogDetails> {
 
   @override
   Widget build(BuildContext context) {
+    // DateTime dateTime = DateTime.parse(widget.blog.createdAt)
+    //     .toLocal(); // Convert to local time
+    String formattedDate =
+        DateFormat('dd MMM yyyy, hh:mm a').format(widget.blog.createdAt!);
+
     final theme = Theme.of(context);
 
     return Scaffold(
@@ -32,7 +44,7 @@ class _BlogDetailsState extends State<BlogDetails> {
           child:
               Column(crossAxisAlignment: CrossAxisAlignment.center, children: [
             Text(
-              widget.title,
+              widget.blog.title ?? "title",
               style: theme.textTheme.titleLarge!.copyWith(
                 color: Colors.black,
               ),
@@ -49,10 +61,18 @@ class _BlogDetailsState extends State<BlogDetails> {
                     ),
                     child: ClipRRect(
                       borderRadius: BorderRadius.circular(360),
-                      child: Image.network(
-                        widget.image,
-                        fit: BoxFit.cover,
-                      ),
+                      child: (widget.blog.images!.length > 0)
+                          ? Image.memory(
+                              Uint8List.fromList(
+                                  widget.blog.images![0].data!.cast<int>()),
+                              errorBuilder: (context, error, stackTrace) {
+                                return Center(
+                                  child: Text("img"),
+                                );
+                              },
+                              fit: BoxFit.cover,
+                            )
+                          : Icon(Icons.image),
                     ),
                   ),
                   SizedBox(width: 10.0),
@@ -60,12 +80,12 @@ class _BlogDetailsState extends State<BlogDetails> {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        'Vishnu',
+                        widget.blog.userId!.username!,
                         style: theme.textTheme.displayLarge,
                       ),
                       SizedBox(height: 7.0),
                       Text(
-                        '23 Feb 2025',
+                        formattedDate,
                         style: theme.textTheme.displayMedium!
                             .copyWith(color: ColorsUtil.txtColor),
                       )
@@ -75,26 +95,36 @@ class _BlogDetailsState extends State<BlogDetails> {
               ),
             ),
             SizedBox(height: spacing),
-            Container(
-              height: 250,
-              width: double.infinity,
-              constraints: BoxConstraints(
-                maxWidth: 700.0,
-              ),
-              decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(20),
-              ),
-              child: ClipRRect(
-                borderRadius: BorderRadius.circular(20),
-                child: Image.network(
-                  fit: BoxFit.cover,
-                  widget.image,
-                ),
-              ),
-            ),
+            (widget.blog.images!.length > 0)
+                ? Container(
+                    height: 250,
+                    width: double.infinity,
+                    constraints: BoxConstraints(
+                      maxWidth: 700.0,
+                    ),
+                    decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(20),
+                    ),
+                    child: ClipRRect(
+                      borderRadius: BorderRadius.circular(20),
+                      child: (widget.blog.images!.length > 0)
+                          ? Image.memory(
+                              Uint8List.fromList(
+                                  widget.blog.images![0].data!.cast<int>()),
+                              errorBuilder: (context, error, stackTrace) {
+                                return Center(
+                                  child: Text("img"),
+                                );
+                              },
+                              fit: BoxFit.cover,
+                            )
+                          : Icon(Icons.image),
+                    ),
+                  )
+                : SizedBox(),
             SizedBox(height: spacing),
             Text(
-              widget.description,
+              widget.blog.content ?? "No content yet",
               style: theme.textTheme.bodyMedium,
             ),
             SizedBox(height: spacing),

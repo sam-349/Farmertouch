@@ -1,20 +1,30 @@
+import 'dart:typed_data';
+
 import 'package:carousel_slider/carousel_slider.dart';
 import 'package:farmers_touch/colors.dart';
 import 'package:farmers_touch/models/address_model.dart';
+import 'package:farmers_touch/models/cart_model.dart';
 import 'package:farmers_touch/models/weather_model.dart';
+import 'package:farmers_touch/provider/user_provider.dart';
+import 'package:farmers_touch/repo/blog_repo.dart';
 import 'package:farmers_touch/util/utils.dart';
 import 'package:farmers_touch/views/main/ai.dart';
 import 'package:farmers_touch/views/main/blog_details.dart';
+import 'package:farmers_touch/views/main/cart.dart';
 import 'package:farmers_touch/views/main/chat_screen.dart';
 import 'package:farmers_touch/views/main/chatbot.dart';
 import 'package:farmers_touch/views/main/crop.dart';
 import 'package:farmers_touch/views/main/livestock.dart';
 import 'package:farmers_touch/views/main/training.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/scheduler.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:geocoding/geocoding.dart';
 import 'package:http/http.dart' as http;
+import 'package:provider/provider.dart';
+import 'package:shimmer/shimmer.dart';
 import 'dart:convert';
+import 'package:url_launcher/url_launcher.dart'; // Import url_launcher
 
 import '../../models/blog_model.dart';
 
@@ -25,7 +35,7 @@ class HomeScreen extends StatefulWidget {
   State<HomeScreen> createState() => _HomeScreenState();
 }
 
-class _HomeScreenState extends State<HomeScreen> {
+class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
   List<String> carousel_images = [
     "https://img.freepik.com/premium-photo/view-sa-dec-flower-garden-dong-thap-province-vietnam-its-famous-mekong-delta-preparing-transport-flowers-market-sale-tet-holiday_991182-14414.jpg?ga=GA1.1.1483351532.1733847503&semt=ais_hybrid",
     "https://img.freepik.com/premium-photo/indian-farmer-working-green-pigeon-peas-field-with-bullock_54391-6543.jpg?ga=GA1.1.1483351532.1733847503&semt=ais_hybrid",
@@ -38,67 +48,15 @@ class _HomeScreenState extends State<HomeScreen> {
     "Livestock",
     "AI",
     "Training",
-    // "Finance",
-    // "Soil",
-    // "Harvest",
-    // "Regulatory",
-    // "Transport",
-    // "Analysis",
-    // "Account",
-    // "Financial",
   ];
 
-  List<Blog> blogs = [
-    Blog(
-      img:
-          'https://images.pexels.com/photos/1719669/pexels-photo-1719669.jpeg?auto=compress&cs=tinysrgb&w=600',
-      title: 'The Importance of Crop Rotation for Soil Health',
-      content:
-          'Crop rotation is a time-tested method that helps maintain soil fertility and reduces pest buildup. By rotating crops, farmers can prevent soil degradation and increase yield over timeldiihg;pbosdiyrgbs;oihg;ositgh;osithg;oirgh;oirtg rstriogho;rigtih ;oihrt oihstg oihrtrg;oitgoihtgoih trgoihtoi...',
-    ),
-    Blog(
-      img:
-          'https://images.pexels.com/photos/30437418/pexels-photo-30437418/free-photo-of-young-green-plant-sprout-emerging-from-soil.jpeg?auto=compress&cs=tinysrgb&w=600',
-      title: 'The Benefits of Organic Farming for Sustainable Agriculture',
-      content:
-          'Organic farming practices focus on sustainability, using natural fertilizers and crop protection methods. This approach not only improves soil health but also reduces the environmental impact of agriculture...',
-    ),
-    Blog(
-      img:
-          'https://images.pexels.com/photos/10606633/pexels-photo-10606633.jpeg?auto=compress&cs=tinysrgb&w=600',
-      title: 'How Drip Irrigation Can Save Water and Boost Yields',
-      content:
-          'Drip irrigation is an efficient way to deliver water directly to the roots of plants, reducing water wastage and improving crop growth. Learn how this technique is helping farmers use water more efficiently...',
-    ),
-    Blog(
-      img:
-          'https://images.pexels.com/photos/10592983/pexels-photo-10592983.jpeg?auto=compress&cs=tinysrgb&w=600',
-      title: 'Exploring Precision Farming for Increased Efficiency',
-      content:
-          'Precision farming uses technology such as GPS and sensors to optimize farming practices. By monitoring soil health, moisture levels, and crop growth, farmers can make data-driven decisions that increase productivity...',
-    ),
-    Blog(
-      img:
-          'https://images.pexels.com/photos/2589457/pexels-photo-2589457.jpeg?auto=compress&cs=tinysrgb&w=600',
-      title: 'Sustainable Agriculture Practices for the Future',
-      content:
-          'Sustainable farming practices are key to feeding a growing population while protecting the environment. Discover techniques that help conserve resources, improve biodiversity, and ensure long-term agricultural viability...',
-    ),
-  ];
+  List<BlogModel> blogs = [];
 
   List<String> grid_images = [
     "https://cdn-icons-png.freepik.com/256/6089/6089661.png?ga=GA1.1.1483351532.1733847503&semt=ais_hybrid",
     "https://cdn-icons-png.freepik.com/256/3319/3319363.png?ga=GA1.1.1483351532.1733847503&semt=ais_hybrid",
     "https://img.freepik.com/premium-vector/artificial-intelligence-vector-illustration_1237743-62154.jpg?ga=GA1.1.1483351532.1733847503&semt=ais_hybrid",
-    // "https://cdn-icons-png.freepik.com/256/5024/5024800.png?ga=GA1.1.1483351532.1733847503&semt=ais_hybrid",
     "https://cdn-icons-png.freepik.com/256/1376/1376421.png?ga=GA1.1.1483351532.1733847503&semt=ais_hybrid",
-    // "https://cdn-icons-png.freepik.com/256/2953/2953423.png?ga=GA1.1.1483351532.1733847503&semt=ais_hybrid",
-    // "https://cdn-icons-png.freepik.com/256/18007/18007373.png?ga=GA1.1.1483351532.1733847503&semt=ais_hybrid",
-    // "https://cdn-icons-png.freepik.com/256/4832/4832398.png?ga=GA1.1.1483351532.1733847503&semt=ais_hybrid",
-    // "https://cdn-icons-png.freepik.com/256/18619/18619584.png?ga=GA1.1.1483351532.1733847503&semt=ais_hybrid",
-    // "https://cdn-icons-png.freepik.com/256/11845/11845726.png?ga=GA1.1.1483351532.1733847503&semt=ais_hybrid",
-    // "https://cdn-icons-png.freepik.com/256/3703/3703299.png?ga=GA1.1.1483351532.1733847503&semt=ais_hybrid",
-    // "https://cdn-icons-png.freepik.com/256/17515/17515464.png?ga=GA1.1.1483351532.1733847503&semt=ais_hybrid",
   ];
 
   List<Widget> grid_screens = [
@@ -110,29 +68,163 @@ class _HomeScreenState extends State<HomeScreen> {
 
   Address? cur_address;
   Weather? weather;
+  bool isLoading = false;
+  String searchString = "";
+  bool locationPermissionDenied = false;
+  bool fetchingLocationAgain = false;
+  bool locationServicesDisabled =
+      false; // Track if location services are disabled
+  bool hasPromptedForLocation =
+      false; // New flag to track if we've asked user already
+
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance
+        .addObserver(this); // Add observer for app lifecycle changes
+    Provider.of<UserProvider>(context, listen: false).loadDataFromPrefs();
+    getAddress();
+
+    SchedulerBinding.instance.addPostFrameCallback((_) async {
+      isLoading = true;
+      setState(() {});
+      debugPrint("get blogs called");
+      final blogs_res = await BlogRepo().getBlogs();
+      if (blogs_res != null) {
+        blogs.addAll(blogs_res);
+        setState(() {
+          isLoading = false;
+        });
+      } else {
+        debugPrint("error: " + blogs_res.toString());
+      }
+    });
+  }
+
+  @override
+  void dispose() {
+    WidgetsBinding.instance.removeObserver(this); // Clean up observer
+    super.dispose();
+  }
+
+  // This method is called when the app lifecycle changes (e.g. comes back from background)
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    super.didChangeAppLifecycleState(state);
+
+    // When app resumes (comes back from settings or another app)
+    if (state == AppLifecycleState.resumed) {
+      // Check if location services were previously disabled
+      if (locationServicesDisabled) {
+        _checkLocationServicesAndRefresh();
+      }
+    }
+  }
+
+  // Function to check if location services are now enabled and refresh data
+  Future<void> _checkLocationServicesAndRefresh() async {
+    bool serviceEnabled = await Geolocator.isLocationServiceEnabled();
+
+    // If location services were disabled but are now enabled
+    if (serviceEnabled && locationServicesDisabled) {
+      debugPrint("Location services now enabled, refreshing data");
+      getAddress(forceRefresh: true);
+    }
+  }
 
   Future<Position> _getCurrentPosition() async {
     bool serviceEnabled;
     LocationPermission permission;
 
+    // Check if location services are enabled
     serviceEnabled = await Geolocator.isLocationServiceEnabled();
     if (!serviceEnabled) {
+      setState(() {
+        locationServicesDisabled = true;
+      });
+
+      // Only show dialog if we haven't prompted the user yet
+      if (!hasPromptedForLocation) {
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+          _showLocationServicesDialog();
+        });
+      }
+
       return Future.error('Location services are disabled.');
+    } else {
+      setState(() {
+        locationServicesDisabled = false;
+      });
     }
 
+    // Check for permissions
     permission = await Geolocator.checkPermission();
     if (permission == LocationPermission.denied) {
       permission = await Geolocator.requestPermission();
       if (permission == LocationPermission.denied) {
+        setState(() {
+          locationPermissionDenied = true;
+          hasPromptedForLocation = true; // Mark that we've prompted the user
+        });
         return Future.error('Location permissions are denied');
       }
     }
 
     if (permission == LocationPermission.deniedForever) {
+      setState(() {
+        locationPermissionDenied = true;
+        hasPromptedForLocation = true; // Mark that we've prompted the user
+      });
       return Future.error(
           'Location permissions are permanently denied, we cannot request permissions.');
     }
+
+    setState(() {
+      locationPermissionDenied = false;
+    });
     return await Geolocator.getCurrentPosition();
+  }
+
+  // Show dialog to prompt user to enable location services
+  void _showLocationServicesDialog() {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Text('Enable Location Services'),
+          content: Text(
+              'Location services are disabled. Would you like to enable them for weather updates and local information?'),
+          actions: <Widget>[
+            TextButton(
+              child: Text('No'),
+              onPressed: () {
+                setState(() {
+                  hasPromptedForLocation = true;
+                });
+                Navigator.of(context).pop();
+              },
+            ),
+            TextButton(
+              child: Text('Yes'),
+              onPressed: () {
+                setState(() {
+                  hasPromptedForLocation = true;
+                });
+                Navigator.of(context).pop();
+                Geolocator.openLocationSettings();
+              },
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  // Function to open app settings with auto-check on return
+  Future<void> _openAppSettings() async {
+    await Geolocator.openLocationSettings();
+    // We don't need to do anything here as the didChangeAppLifecycleState
+    // will handle refreshing the location when the app resumes
   }
 
   Future<Map<String, dynamic>> _getAddressFromCoordinates(
@@ -142,13 +234,11 @@ class _HomeScreenState extends State<HomeScreen> {
       position.longitude,
     );
 
-    // Select the most relevant placemark
     Placemark place = placemarks.firstWhere(
       (placemark) => placemark.street != null && placemark.locality != null,
       orElse: () => placemarks[0],
     );
 
-    // Return address details as a JSON-like map
     return {
       "street": place.street,
       "locality": place.locality,
@@ -162,7 +252,8 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   Future<Weather> getWeather(double latitude, double longitude) async {
-    String apiKey = '0c2ec8b3f7414263a0a1918d217722bb';
+    String apiKey =
+        '0c2ec8b3f7414263a0a1918d217722bb'; // Replace with your API key
     String url =
         'https://api.openweathermap.org/data/2.5/weather?lat=$latitude&lon=$longitude&appid=$apiKey&units=metric';
 
@@ -177,155 +268,252 @@ class _HomeScreenState extends State<HomeScreen> {
     }
   }
 
-  Future<void> getAddress() async {
-    Position position = await _getCurrentPosition();
-    Address address =
-        Address.fromJson(await _getAddressFromCoordinates(position));
-    debugPrint(address.toString());
-    debugPrint(
-        position.latitude.toString() + " " + position.latitude.toString());
-    var cur_weather = await getWeather(position.latitude, position.longitude);
-    debugPrint(weather.toString());
+  Future<void> getAddress({bool forceRefresh = false}) async {
+    final userProvider = Provider.of<UserProvider>(context, listen: false);
+
+    if (!forceRefresh && userProvider.hasLocationData) {
+      setState(() {
+        cur_address = userProvider.address;
+        weather = userProvider.weather;
+      });
+      return;
+    }
+
     setState(() {
-      cur_address = address;
-      weather = cur_weather;
+      fetchingLocationAgain = forceRefresh;
     });
+
+    try {
+      Position position = await _getCurrentPosition();
+      Address address =
+          Address.fromJson(await _getAddressFromCoordinates(position));
+      var fetchedWeather =
+          await getWeather(position.latitude, position.longitude);
+
+      setState(() {
+        cur_address = address;
+        weather = fetchedWeather;
+      });
+
+      userProvider.setLocation(address, weather);
+    } catch (e) {
+      debugPrint("Error fetching location: $e");
+      // locationPermissionDenied and locationServicesDisabled will handle different states
+    } finally {
+      setState(() {
+        fetchingLocationAgain = false;
+      });
+    }
   }
 
-  @override
-  void initState() {
-    // TODO: implement initState
-    super.initState();
-    getAddress();
-  }
+  // Function to open app settings
+  // Future<void> _openAppSettings() async {
+  //   final Uri appSettingsUri = Uri(
+  //     scheme: "package",
+  //     path: "farmers_touch", // Replace with your app's package name
+  //   );
+  //   await launchUrl(appSettingsUri);
+  // }
+
+  // @override
+  // void initState() {
+  //   super.initState();
+  //   WidgetsBinding.instance
+  //       .addObserver(this); // Add observer for app lifecycle changes
+  //   Provider.of<UserProvider>(context, listen: false).loadDataFromPrefs();
+  //   getAddress();
+
+  //   SchedulerBinding.instance.addPostFrameCallback((_) async {
+  //     isLoading = true;
+  //     setState(() {});
+  //     debugPrint("get blogs called");
+  //     final blogs_res = await BlogRepo().getBlogs();
+  //     if (blogs_res != null) {
+  //       blogs.addAll(blogs_res);
+  //       setState(() {
+  //         isLoading = false;
+  //       });
+  //     } else {
+  //       debugPrint("error: " + blogs_res.toString());
+  //     }
+  //   });
+  // }
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     double height = MediaQuery.of(context).size.height;
     double width = MediaQuery.of(context).size.width;
+    final provider = Provider.of<UserProvider>(context);
 
     return Scaffold(
       backgroundColor: ColorsUtil.bgColor,
       appBar: AppBar(
         backgroundColor: ColorsUtil.primaryColor,
-        leadingWidth: 100,
-        leading: Container(
-          margin: EdgeInsets.only(left: 10),
-          child: Row(children: [
-            Icon(
-              Icons.location_on,
-              color: ColorsUtil.onPrimary,
-            ),
-            SizedBox(
-              width: 5,
-            ),
-            Text(
-              "Home",
-              style: theme.textTheme.titleMedium,
-            )
-          ]),
-        ),
+        // leadingWidth: 140,
+        // leading:
+        //     Container(), // Remove location display from AppBar as requested
         title: Text(
-          "Farmer Touch",
+          "Farmers Touch",
           style: theme.textTheme.titleLarge!.copyWith(letterSpacing: 1),
         ),
-        centerTitle: true,
+        // centerTitle: true,
         actions: [
-          Icon(
-            Icons.shopping_cart_rounded,
-            color: ColorsUtil.onPrimary,
+          IconButton(
+            onPressed: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => CartPage(),
+                ),
+              );
+            },
+            icon: Icon(
+              Icons.shopping_cart_rounded,
+              color: ColorsUtil.onPrimary,
+            ),
           ),
-          SizedBox(
-            width: 15,
-          ),
+          const SizedBox(width: 15),
         ],
         toolbarHeight: 100,
       ),
       body: SingleChildScrollView(
         child: Column(
           children: [
-            SizedBox(
-              height: 20,
-            ),
+            const SizedBox(height: 20),
             CarouselSlider.builder(
               itemCount: carousel_images.length + 1,
               itemBuilder: (context, ind, a) {
                 return Container(
-                  // height: 100,
                   width: width,
-                  margin: EdgeInsets.symmetric(horizontal: 3),
-                  decoration: BoxDecoration(
+                  margin: const EdgeInsets.symmetric(horizontal: 3),
+                  decoration: const BoxDecoration(
                     color: Colors.white,
                     borderRadius: BorderRadius.all(
                       Radius.circular(20),
                     ),
                   ),
-                  // child:
                   child: (ind == (carousel_images.length))
                       ? Column(
                           children: [
-                            Spacer(),
+                            const Spacer(),
+                            // Weather information section
                             ListTile(
-                              title: Text("Today"),
+                              leading: weather != null &&
+                                      weather!.weather!.isNotEmpty
+                                  ? Image.network(
+                                      "https://openweathermap.org/img/wn/${weather!.weather![0].icon}@2x.png",
+                                      width: 50,
+                                      errorBuilder:
+                                          (context, error, stackTrace) =>
+                                              Icon(Icons.error_outline),
+                                    )
+                                  : Icon(
+                                      Icons.cloud,
+                                      size: 50,
+                                    ),
+                              title: const Text("Today"),
                               subtitle: Text(
                                 (weather != null)
-                                    ? (weather!.weather![0].main.toString() +
-                                            ": " +
-                                            weather!.main!.tempMax.toString() +
-                                            " / " +
-                                            weather!.main!.tempMin
-                                                .toString()) ??
-                                        ""
-                                    : "loading....",
+                                    ? ("${weather!.weather![0].main ?? ""} : ${weather!.main!.tempMax.toString()}°C / ${weather!.main!.tempMin.toString()}°C")
+                                    : "Weather unavailable",
                               ),
                               trailing: Container(
                                 height: 50,
                                 width: 100,
-                                // decoration: BoxDecoration(color: Colors.red),
                                 child: Row(
                                   mainAxisAlignment:
                                       MainAxisAlignment.spaceBetween,
                                   children: [
                                     Text(
                                       (weather != null)
-                                          ? weather!.weather![0].main ?? ""
-                                          : "loading....",
+                                          ? weather!.weather![0].description
+                                                  ?.toUpperCase() ??
+                                              "N/A"
+                                          : locationServicesDisabled
+                                              ? "Location Off"
+                                              : locationPermissionDenied
+                                                  ? "Location Denied"
+                                                  : "Loading...",
                                       style:
                                           theme.textTheme.titleMedium!.copyWith(
                                         color: ColorsUtil.txtColor,
                                       ),
                                     ),
-                                    // Icon(Icons.wb_sunny),
                                   ],
                                 ),
                               ),
                             ),
-                            Spacer(),
+                            const Spacer(),
+                            // Location information section - updated with better UI for different states
                             Container(
-                              padding: EdgeInsets.all(10),
-                              margin: EdgeInsets.all(3),
+                              padding: const EdgeInsets.all(10),
+                              margin: const EdgeInsets.all(3),
                               decoration: BoxDecoration(
-                                color: Colors.red.shade200,
-                                borderRadius: BorderRadius.only(
+                                color: locationServicesDisabled ||
+                                        locationPermissionDenied
+                                    ? Colors.orange
+                                        .shade200 // Warning color when location not available
+                                    : Colors.red.shade200,
+                                borderRadius: const BorderRadius.only(
                                   bottomLeft: Radius.circular(20),
                                   bottomRight: Radius.circular(20),
                                 ),
                               ),
-                              child: (cur_address != null)
+                              child: locationServicesDisabled
                                   ? ListTile(
-                                      leading: Icon(Icons.location_on),
-                                      title: Text(
-                                          (cur_address!.locality ?? "") +
-                                              ", " +
-                                              (cur_address!.postalCode ?? "")),
+                                      leading: const Icon(Icons.location_off),
+                                      title: const Text(
+                                          "Location services disabled"),
+                                      trailing: ElevatedButton(
+                                        onPressed: _openAppSettings,
+                                        child: const Text("Enable"),
+                                        style: ElevatedButton.styleFrom(
+                                          backgroundColor:
+                                              ColorsUtil.primaryColor,
+                                          foregroundColor: ColorsUtil.onPrimary,
+                                        ),
+                                      ),
                                     )
-                                  : ListTile(
-                                      leading: Icon(Icons.location_on),
-                                      title:
-                                          Text("Location permission required "),
-                                      trailing: Text("Allow"),
-                                    ),
+                                  : locationPermissionDenied
+                                      ? ListTile(
+                                          leading: const Icon(
+                                              Icons.location_disabled),
+                                          title: const Text(
+                                              "Location permission required"),
+                                          trailing: ElevatedButton(
+                                            onPressed: () =>
+                                                getAddress(forceRefresh: true),
+                                            child: const Text("Allow"),
+                                            style: ElevatedButton.styleFrom(
+                                              backgroundColor:
+                                                  ColorsUtil.primaryColor,
+                                              foregroundColor:
+                                                  ColorsUtil.onPrimary,
+                                            ),
+                                          ),
+                                        )
+                                      : fetchingLocationAgain
+                                          ? const ListTile(
+                                              leading: Icon(Icons.refresh),
+                                              title:
+                                                  Text("Fetching location..."),
+                                              trailing:
+                                                  CircularProgressIndicator(),
+                                            )
+                                          : ListTile(
+                                              leading:
+                                                  const Icon(Icons.location_on),
+                                              title: Text(cur_address != null
+                                                  ? "${cur_address!.locality ?? ""}, ${cur_address!.postalCode ?? ""}"
+                                                  : "Location unknown"),
+                                              trailing: IconButton(
+                                                icon: Icon(Icons.refresh),
+                                                onPressed: () => getAddress(
+                                                    forceRefresh: true),
+                                                tooltip: "Refresh location",
+                                              ),
+                                            ),
                             ),
                           ],
                         )
@@ -339,24 +527,22 @@ class _HomeScreenState extends State<HomeScreen> {
                 );
               },
               options: CarouselOptions(
-                height: 200,
-                // autoPlay: true,
+                height: 230,
                 enlargeCenterPage: true,
                 enlargeFactor: 0.2,
               ),
             ),
-            SizedBox(
-              height: 20,
-            ),
+            const SizedBox(height: 20),
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 20.0),
               child: Column(
                 children: [
                   GridView.builder(
                     shrinkWrap: true,
-                    physics: NeverScrollableScrollPhysics(),
+                    physics: const NeverScrollableScrollPhysics(),
                     itemCount: grid_text.length,
-                    gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                    gridDelegate:
+                        const SliverGridDelegateWithFixedCrossAxisCount(
                       crossAxisCount: 2,
                       mainAxisSpacing: 10,
                       crossAxisSpacing: 10,
@@ -380,7 +566,7 @@ class _HomeScreenState extends State<HomeScreen> {
                           ),
                           child: Column(
                             children: [
-                              Spacer(),
+                              const Spacer(),
                               Container(
                                 height: 60,
                                 width: 60,
@@ -392,16 +578,16 @@ class _HomeScreenState extends State<HomeScreen> {
                                   fit: BoxFit.cover,
                                 ),
                               ),
-                              SizedBox(height: 5),
+                              const SizedBox(height: 5),
                               Text(grid_text[ind]),
-                              Spacer(),
+                              const Spacer(),
                             ],
                           ),
                         ),
                       );
                     },
                   ),
-                  SizedBox(
+                  const SizedBox(
                     height: 20,
                   ),
                   Container(
@@ -409,9 +595,28 @@ class _HomeScreenState extends State<HomeScreen> {
                     width: width,
                     decoration:
                         BoxDecoration(borderRadius: BorderRadius.circular(360)),
-                    child: Reusable.textField(),
+                    child: Reusable.textField((val) async {
+                      setState(() {
+                        searchString = val.trim();
+                        isLoading = true;
+                      });
+                      if (searchString.isEmpty) {
+                        final content = await BlogRepo().getBlogs();
+                        setState(() {
+                          blogs = content!;
+                          isLoading = false;
+                        });
+                      } else {
+                        final content =
+                            await BlogRepo().searchBlogs(searchString);
+                        setState(() {
+                          blogs = content!;
+                          isLoading = false;
+                        });
+                      }
+                    }),
                   ),
-                  SizedBox(
+                  const SizedBox(
                     height: 20,
                   ),
                   Row(
@@ -422,91 +627,122 @@ class _HomeScreenState extends State<HomeScreen> {
                       ),
                     ],
                   ),
-                  SizedBox(height: 20),
-                  ...blogs
-                      .map(
-                        (blog) => GestureDetector(
-                          onTap: () {
-                            Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                builder: (context) => BlogDetails(
-                                    title: blog.title,
-                                    image: blog.img,
-                                    description: blog.content),
-                              ),
-                            );
-                          },
-                          child: Container(
-                            padding: EdgeInsets.all(10),
-                            margin: EdgeInsets.symmetric(vertical: 10),
-                            decoration: BoxDecoration(
-                                color: ColorsUtil.onPrimary,
-                                borderRadius: BorderRadius.circular(10),
-                                boxShadow: [
-                                  BoxShadow(
-                                    color: Colors.grey.shade300,
-                                    blurRadius: 2,
-                                    spreadRadius: 5,
-                                  )
-                                ]),
-                            child: Row(
+                  const SizedBox(height: 20),
+                  (!isLoading)
+                      ? (blogs.isNotEmpty)
+                          ? Column(
                               children: [
-                                // Image Container (leading)
-                                Container(
-                                  height: 100,
-                                  width: 100,
-                                  decoration: BoxDecoration(
-                                    // color: Colors.red,
-                                    borderRadius: BorderRadius.circular(360),
-                                  ),
-                                  child: ClipRRect(
-                                    borderRadius: BorderRadius.circular(360),
-                                    child: Image.network(
-                                      blog.img,
-                                      errorBuilder:
-                                          (context, error, stackTrace) {
-                                        return Center(child: Text("img"));
-                                      },
-                                      fit: BoxFit.cover,
-                                    ),
-                                  ),
-                                ),
-                                // Spacer to provide some space between the image and text
-                                SizedBox(width: 16),
-
-                                // Column to display title and content
-                                Expanded(
-                                  child: Column(
-                                    crossAxisAlignment:
-                                        CrossAxisAlignment.start,
-                                    children: [
-                                      // Title
-                                      Padding(
-                                        padding:
-                                            const EdgeInsets.only(bottom: 8.0),
-                                        child: Text(
-                                          blog.title,
-                                          maxLines: 3,
-                                          overflow: TextOverflow.ellipsis,
-                                          style: theme.textTheme.displayLarge,
+                                ...blogs
+                                    .map(
+                                      (blog) => GestureDetector(
+                                        onTap: () {
+                                          Navigator.push(
+                                            context,
+                                            MaterialPageRoute(
+                                              builder: (context) => BlogDetails(
+                                                blog: blog,
+                                              ),
+                                            ),
+                                          );
+                                        },
+                                        child: Container(
+                                          padding: const EdgeInsets.all(10),
+                                          margin: const EdgeInsets.symmetric(
+                                              vertical: 10),
+                                          decoration: BoxDecoration(
+                                              color: ColorsUtil.onPrimary,
+                                              borderRadius:
+                                                  BorderRadius.circular(10),
+                                              boxShadow: [
+                                                BoxShadow(
+                                                    color: Colors.grey.shade300,
+                                                    blurRadius: 2,
+                                                    spreadRadius: 5),
+                                              ]),
+                                          child: Row(
+                                            children: [
+                                              Container(
+                                                height: 100,
+                                                width: 100,
+                                                decoration: BoxDecoration(
+                                                  borderRadius:
+                                                      BorderRadius.circular(
+                                                          360),
+                                                ),
+                                                child: ClipRRect(
+                                                  borderRadius:
+                                                      BorderRadius.circular(
+                                                          360),
+                                                  child: (blog
+                                                          .images!.isNotEmpty)
+                                                      ? Image.memory(
+                                                          Uint8List.fromList(
+                                                              blog.images![0]
+                                                                  .data!
+                                                                  .cast<int>()),
+                                                          errorBuilder:
+                                                              (context, error,
+                                                                  stackTrace) {
+                                                            return const Center(
+                                                                child: Text(
+                                                                    "img"));
+                                                          },
+                                                          fit: BoxFit.cover,
+                                                        )
+                                                      : const Icon(Icons.image),
+                                                ),
+                                              ),
+                                              const SizedBox(width: 16),
+                                              Expanded(
+                                                child: Column(
+                                                  crossAxisAlignment:
+                                                      CrossAxisAlignment.start,
+                                                  children: [
+                                                    Padding(
+                                                      padding:
+                                                          const EdgeInsets.only(
+                                                              bottom: 8.0),
+                                                      child: Text(
+                                                        blog.title ?? "title",
+                                                        maxLines: 3,
+                                                        overflow: TextOverflow
+                                                            .ellipsis,
+                                                        style: theme.textTheme
+                                                            .displayLarge,
+                                                      ),
+                                                    ),
+                                                    Text(
+                                                      blog.content ??
+                                                          "No content yet",
+                                                      maxLines: 6,
+                                                      overflow:
+                                                          TextOverflow.ellipsis,
+                                                    ),
+                                                  ],
+                                                ),
+                                              ),
+                                            ],
+                                          ),
                                         ),
                                       ),
-                                      // Subtitle / Content
-                                      Text(
-                                        blog.content,
-                                        maxLines: 6,
-                                        overflow: TextOverflow.ellipsis,
-                                      ),
-                                    ],
-                                  ),
-                                ),
+                                    )
+                                    .toList(),
                               ],
+                            )
+                          : const Text("No blogs available")
+                      : Shimmer.fromColors(
+                          baseColor: const Color(0xFFF0F0F0),
+                          highlightColor: const Color(0xFFE0E0E0),
+                          child: Container(
+                            height: 100,
+                            width: double.infinity,
+                            decoration: BoxDecoration(
+                              borderRadius: BorderRadius.circular(10),
+                              color: Colors.grey,
                             ),
                           ),
                         ),
-                      )
-                      .toList()
+                  const SizedBox(height: 20),
                 ],
               ),
             ),

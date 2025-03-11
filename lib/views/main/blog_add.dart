@@ -1,9 +1,12 @@
 import 'dart:io';
 
 import 'package:farmers_touch/colors.dart';
+import 'package:farmers_touch/provider/user_provider.dart';
+import 'package:farmers_touch/repo/blog_repo.dart';
 import 'package:farmers_touch/util/utils.dart';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:provider/provider.dart';
 
 class BlogAdd extends StatefulWidget {
   const BlogAdd({super.key});
@@ -25,6 +28,8 @@ class _BlogAddState extends State<BlogAdd> {
     double spacing = 30.0;
     List<String> category = ["Fruits", "Vegetables", "Crops"];
     ImagePicker picker = ImagePicker();
+    final provider = Provider.of<UserProvider>(context);
+    String selectedCategory = "";
 
     return Scaffold(
       appBar: AppBar(
@@ -34,7 +39,7 @@ class _BlogAddState extends State<BlogAdd> {
           "Add a Blog",
           style: theme.textTheme.titleLarge,
         ),
-        centerTitle: true,
+        // centerTitle: true,
       ),
       body: Padding(
         padding: const EdgeInsets.symmetric(horizontal: 30.0, vertical: 15.0),
@@ -49,6 +54,11 @@ class _BlogAddState extends State<BlogAdd> {
                 Reusable.customField('content', content),
                 SizedBox(height: spacing),
                 DropdownMenu(
+                  onSelected: (val) {
+                    setState(() {
+                      selectedCategory = val!;
+                    });
+                  },
                   menuStyle: MenuStyle(
                     // maximumSize: MaterialStateProperty.all(Size(300, 300)),
                     backgroundColor:
@@ -122,8 +132,16 @@ class _BlogAddState extends State<BlogAdd> {
                 Container(
                   height: 50,
                   width: double.infinity,
-                  child:
-                      ElevatedButton(onPressed: () {}, child: Text("submit")),
+                  child: ElevatedButton(
+                      onPressed: () async {
+                        final response = await BlogRepo().uploadBlog(
+                            title.text.toString(),
+                            content.text.toString(),
+                            selectedCategory,
+                            provider.userID!,
+                            files);
+                      },
+                      child: Text("submit")),
                 ),
                 SizedBox(height: spacing),
                 (files.length > 0)

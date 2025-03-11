@@ -2,10 +2,13 @@ import 'dart:convert';
 import 'dart:io';
 
 import 'package:farmers_touch/colors.dart';
+import 'package:farmers_touch/models/crop_analysis_result_model.dart';
+import 'package:farmers_touch/repo/plant_disease_predict_repo.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_gemini/flutter_gemini.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:mime/mime.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 class AI extends StatefulWidget {
   const AI({super.key});
@@ -18,6 +21,9 @@ class _AIState extends State<AI> {
   File? _image;
   final ImagePicker _picker = ImagePicker();
   final Gemini _gemini = Gemini.instance; // Initialize Gemini instance
+  AnalysisResultModel? result; // Declare result variable
+  bool isAnalyzing = false;
+
   final String prompt = '''
     Analyze the given image of a crop leaf and predict the possible disease affecting the plant. Provide the following details in the response:
 
@@ -81,33 +87,65 @@ class _AIState extends State<AI> {
   }
 
   Future<void> _analyzeImage(File imageFile) async {
-    try {
-      // Create a FileDataPart
-      FileDataPart filePart = FileDataPart(
-        fileUri: imageFile.path,
-        mimeType: lookupMimeType(imageFile.path),
+    // try {
+    //   // Create a FileDataPart
+    //   FileDataPart filePart = FileDataPart(
+    //     fileUri: imageFile.path,
+    //     mimeType: lookupMimeType(imageFile.path),
+    //   );
+    //   debugPrint(filePart.mimeType);
+
+    //   _gemini.chat(
+    //     // model: ,
+    //     // model: "gemini-pro-vision",
+    //     [
+    //       // Part.text(prompt),
+    //       Content(parts: [Part.file(filePart)]),
+    //     ],
+    //   ).then((value) {
+    //     debugPrint("Got response: ${value!.output}");
+    //     //   if (value.error != null) {
+    //     //   debugPrint("Gemini Error: ${value.error}");
+    //     // }
+    //   }).catchError((e) => debugPrint("Error: " + e.toString()));
+
+    //   // if (response != null) {
+    // _showResult(response.output);
+    //   // }
+    // } catch (e) {
+    //   print("Error analyzing image: $e");
+    // }
+    if (imageFile == null) return null;
+    debugPrint("analyse called");
+
+    final File file = File(imageFile.path);
+    final List<int> imageBytes = await file.readAsBytes();
+    final String base64Image = base64Encode(imageBytes);
+    final response = await PlantDiseasePredictRepo()
+        .sendHealthAssessmentRequest(base64Image);
+
+    if (response != null) {
+      if (response != null) {
+        setState(() {
+          result = response; // Store the result
+        });
+        _showBottomSheet(); // Open the bottom sheet
+      } else {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Failed to analyze image.')),
+        );
+      }
+    }
+
+    debugPrint(response.toString());
+  }
+
+  void _showBottomSheet() {
+    if (result == null || result!.result == null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('No results to display.')),
       );
-      debugPrint(filePart.mimeType);
-
-      _gemini.chat(
-        // model: ,
-        // model: "gemini-pro-vision",
-        [
-          // Part.text(prompt),
-          Content(parts: [Part.file(filePart)]),
-        ],
-      ).then((value) {
-        debugPrint("Got response: ${value!.output}");
-        //   if (value.error != null) {
-        //   debugPrint("Gemini Error: ${value.error}");
-        // }
-      }).catchError((e) => debugPrint("Error: " + e.toString()));
-
-      // if (response != null) {
-      //   _showResult(response.output);
-      // }
-    } catch (e) {
-      print("Error analyzing image: $e");
+      return;
     }
   }
 
@@ -204,82 +242,183 @@ class _AIState extends State<AI> {
                 ],
               ),
               SizedBox(height: spacing),
-              Container(
-                height: 50,
-                width: double.infinity,
-                child: ElevatedButton(
-                  onPressed: () {
-                    if (_image != null) {
-                      _analyzeImage(_image!);
-                    }
-                  },
-                  child: Text("Analyze image"),
-                ),
-              ),
+              (isAnalyzing)
+                  ? CircularProgressIndicator(
+                      color: ColorsUtil.primaryColor,
+                    )
+                  : Container(
+                      height: 50,
+                      width: double.infinity,
+                      child: ElevatedButton(
+                        onPressed: () {
+                          if (_image != null) {
+                            setState(() {
+                              isAnalyzing = true;
+                            });
+                            _analyzeImage(_image!);
+                            setState(() {
+                              isAnalyzing = false;
+                            });
+                          }
+                        },
+                        child: Text("Analyze image"),
+                      ),
+                    ),
               SizedBox(height: spacing),
               Container(
                 height: 50,
                 width: double.infinity,
                 child: ElevatedButton(
-                  onPressed: () {
-                    showModalBottomSheet(
-                        context: context,
-                        builder: (context) {
-                          return Container(
-                            width: double.infinity,
-                            padding: EdgeInsets.all(20),
-                            child: SingleChildScrollView(
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                // mainAxisSize: MainAxisSize.max,
-                                children: [
-                                  Center(
-                                    child: Container(
-                                      height: 5,
-                                      alignment: Alignment.center,
-                                      width: width / 3,
-                                      decoration: BoxDecoration(
-                                        borderRadius:
-                                            BorderRadius.circular(360),
-                                        color: Colors.grey,
+                  style: ElevatedButton.styleFrom(
+                    disabledBackgroundColor: Colors.grey[300],
+                    disabledForegroundColor: Colors.grey[600],
+                  ),
+                  onPressed: (result == null)
+                      ? null
+                      : () {
+                          showModalBottomSheet(
+                            context: context,
+                            builder: (context) {
+                              final width = MediaQuery.of(context).size.width;
+
+                              final disease = result?.result?.disease;
+                              final isHealthy = result?.result?.isHealthy;
+                              final isPlant = result?.result?.isPlant;
+
+                              return (result == null || result!.result == null)
+                                  ? const Padding(
+                                      padding: EdgeInsets.all(16.0),
+                                      child: Text(
+                                          "Upload an image and send for analysis first"),
+                                    )
+                                  : Container(
+                                      width: double.infinity,
+                                      padding: const EdgeInsets.all(20),
+                                      child: SingleChildScrollView(
+                                        child: Column(
+                                          crossAxisAlignment:
+                                              CrossAxisAlignment.start,
+                                          children: [
+                                            Center(
+                                              child: Container(
+                                                height: 5,
+                                                alignment: Alignment.center,
+                                                width: width / 3,
+                                                decoration: BoxDecoration(
+                                                  borderRadius:
+                                                      BorderRadius.circular(
+                                                          360),
+                                                  color: Colors.grey,
+                                                ),
+                                              ),
+                                            ),
+                                            const SizedBox(height: 20),
+                                            if (disease != null &&
+                                                disease.suggestions != null &&
+                                                disease.suggestions!.isNotEmpty)
+                                              _buildSectionTitle(
+                                                  'Predicted Diseases'),
+                                            if (disease != null &&
+                                                disease.suggestions != null)
+                                              ...disease.suggestions!
+                                                  .map((suggestion) {
+                                                return Column(
+                                                  crossAxisAlignment:
+                                                      CrossAxisAlignment.start,
+                                                  children: [
+                                                    _buildText(
+                                                        'Name: ${suggestion.name ?? 'Unknown'}'),
+                                                    _buildText(
+                                                        'Probability: ${suggestion.probability?.toStringAsFixed(2) ?? 'N/A'}'),
+                                                    if (suggestion
+                                                                .similarImages !=
+                                                            null &&
+                                                        suggestion
+                                                            .similarImages!
+                                                            .isNotEmpty)
+                                                      Column(
+                                                        crossAxisAlignment:
+                                                            CrossAxisAlignment
+                                                                .start,
+                                                        children: [
+                                                          _buildSectionTitle(
+                                                              'Similar Images'),
+                                                          ...suggestion
+                                                              .similarImages!
+                                                              .map((image) {
+                                                            return InkWell(
+                                                              onTap: () async {
+                                                                if (image.url !=
+                                                                    null) {
+                                                                  final Uri
+                                                                      url =
+                                                                      Uri.parse(
+                                                                          image
+                                                                              .url!);
+                                                                  if (await canLaunchUrl(
+                                                                      url)) {
+                                                                    await launchUrl(
+                                                                        url);
+                                                                  } else {
+                                                                    ScaffoldMessenger.of(
+                                                                            context)
+                                                                        .showSnackBar(const SnackBar(
+                                                                            content:
+                                                                                Text('Could not launch URL.')));
+                                                                  }
+                                                                }
+                                                              },
+                                                              child: Padding(
+                                                                padding: const EdgeInsets
+                                                                    .symmetric(
+                                                                    vertical:
+                                                                        4.0),
+                                                                child: Text(
+                                                                  image.url ??
+                                                                      'N/A',
+                                                                  style:
+                                                                      TextStyle(
+                                                                    color: image.url !=
+                                                                            null
+                                                                        ? Colors
+                                                                            .blue
+                                                                        : Colors
+                                                                            .black,
+                                                                    decoration: image.url !=
+                                                                            null
+                                                                        ? TextDecoration
+                                                                            .underline
+                                                                        : TextDecoration
+                                                                            .none,
+                                                                  ),
+                                                                ),
+                                                              ),
+                                                            );
+                                                          }).toList(),
+                                                        ],
+                                                      ),
+                                                    const SizedBox(height: 12),
+                                                  ],
+                                                );
+                                              }).toList(),
+                                            if (isHealthy != null)
+                                              _buildSectionTitle('Is Healthy'),
+                                            if (isHealthy != null)
+                                              _buildText(
+                                                  'Binary: ${isHealthy.binary?.toString() ?? 'N/A'}, Probability: ${isHealthy.probability?.toStringAsFixed(2) ?? 'N/A'}'),
+                                            if (isPlant != null)
+                                              _buildSectionTitle('Is Plant'),
+                                            if (isPlant != null)
+                                              _buildText(
+                                                  'Binary: ${isPlant.binary?.toString() ?? 'N/A'}, Probability: ${isPlant.probability?.toStringAsFixed(2) ?? 'N/A'}'),
+                                            // Add more sections as needed based on your model
+                                          ],
+                                        ),
                                       ),
-                                    ),
-                                  ),
-                                  SizedBox(height: 20),
-                                  _buildSectionTitle('Predicted Disease'),
-                                  _buildText(
-                                      diseasePrediction['predicted_disease']),
-                                  SizedBox(height: 12),
-                                  _buildSectionTitle('Confidence'),
-                                  _buildText(diseasePrediction['confidence']),
-                                  SizedBox(height: 12),
-                                  _buildSectionTitle('Symptoms Analysis'),
-                                  _buildText(
-                                      diseasePrediction['symptoms_analysis']),
-                                  SizedBox(height: 12),
-                                  _buildSectionTitle('Possible Causes'),
-                                  ..._buildList(
-                                      diseasePrediction['possible_causes']),
-                                  SizedBox(height: 12),
-                                  _buildSectionTitle('Suggestive Measures'),
-                                  _buildSubSection(
-                                      'Natural Remedies',
-                                      diseasePrediction['suggestive_measures']
-                                          ['natural_remedies']),
-                                  _buildSubSection(
-                                      'Chemical Treatments',
-                                      diseasePrediction['suggestive_measures']
-                                          ['chemical_treatments']),
-                                  _buildSubSection(
-                                      'Preventive Measures',
-                                      diseasePrediction['suggestive_measures']
-                                          ['preventive_measures']),
-                                ],
-                              ),
-                            ),
+                                    );
+                            },
                           );
-                        });
-                  },
+                        },
                   child: Text("See Results"),
                 ),
               ),

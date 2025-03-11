@@ -37,18 +37,18 @@ class _BuySellState extends State<BuySell> with SingleTickerProviderStateMixin {
       appBar: AppBar(
         automaticallyImplyLeading: false,
         leadingWidth: 30,
-        leading: IconButton(
-          onPressed: () {
-            Navigator.pop(context);
-          },
-          icon: Icon(
-            Icons.arrow_back,
-            color: ColorsUtil.onPrimary,
-          ),
-        ),
+        // leading: IconButton(
+        //   onPressed: () {
+        //     Navigator.pop(context);
+        //   },
+        //   icon: Icon(
+        //     Icons.arrow_back,
+        //     color: ColorsUtil.onPrimary,
+        //   ),
+        // ),
         backgroundColor: ColorsUtil.primaryColor,
         title: Text(
-          "New post",
+          "Products",
           style: theme.textTheme.titleLarge,
         ),
       ),

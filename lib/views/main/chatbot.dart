@@ -14,8 +14,11 @@ class _ChatBotState extends State<ChatBot> {
   List<ChatMessage> messages = [];
   final Gemini gemini = Gemini.instance;
   ChatUser currentUser = ChatUser(id: "user", firstName: "Swaroop");
-  ChatUser geminiUser = ChatUser(id: "model", firstName: "Gemini");
+  ChatUser geminiUser = ChatUser(id: "model", firstName: "ChatBot");
   bool isThinking = false;
+
+  final String systemPrompt =
+      "You are a helpful assistant specialized in farming. Answer only questions related to farming. If a question is outside the scope of farming, respond with 'I can only answer questions related to farming.'";
 
   @override
   Widget build(BuildContext context) {
@@ -42,7 +45,7 @@ class _ChatBotState extends State<ChatBot> {
           ),
           typingUsers: (isThinking) ? [geminiUser] : [],
           messageListOptions: MessageListOptions(typingBuilder: (user) {
-            return Text("Thinking...");
+            return const Text("Thinking...");
           }),
           messageOptions: MessageOptions(
             currentUserContainerColor: ColorsUtil.primaryColor.withOpacity(0.4),
@@ -62,15 +65,15 @@ class _ChatBotState extends State<ChatBot> {
     setState(() {
       isThinking = true;
     });
-    gemini
-        .chat(
-      messages.reversed.map((message) {
-        return Content(parts: [
-          Part.text(message.text),
-        ], role: message.user.id);
+
+    List<Content> chatHistory = [
+      Content(parts: [Part.text(systemPrompt)], role: "model"),
+      ...messages.reversed.map((message) {
+        return Content(parts: [Part.text(message.text)], role: message.user.id);
       }).toList(),
-    )
-        .then((value) {
+    ];
+
+    gemini.chat(chatHistory).then((value) {
       setState(() {
         messages = [
           ChatMessage(
