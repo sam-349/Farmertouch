@@ -5,6 +5,7 @@ import 'package:farmers_touch/colors.dart';
 import 'package:farmers_touch/models/address_model.dart';
 import 'package:farmers_touch/models/cart_model.dart';
 import 'package:farmers_touch/models/weather_model.dart';
+import 'package:farmers_touch/provider/launguage_provider.dart';
 import 'package:farmers_touch/provider/user_provider.dart';
 import 'package:farmers_touch/repo/blog_repo.dart';
 import 'package:farmers_touch/util/utils.dart';
@@ -25,6 +26,7 @@ import 'package:provider/provider.dart';
 import 'package:shimmer/shimmer.dart';
 import 'dart:convert';
 import 'package:url_launcher/url_launcher.dart'; // Import url_launcher
+import 'package:flutter_gen/gen_l10n/app_localizations.dart';
 
 import '../../models/blog_model.dart';
 
@@ -43,12 +45,12 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
     "https://img.freepik.com/free-photo/farmer-holds-rice-hand_1150-6063.jpg?ga=GA1.1.1483351532.1733847503&semt=ais_hybrid",
   ];
 
-  List<String> grid_text = [
-    "Crop",
-    "Livestock",
-    "AI",
-    "Training",
-  ];
+  // List<String> grid_text = [
+  //   "Crop",
+  //   "Livestock",
+  //   "AI",
+  //   "Training",
+  // ];
 
   List<BlogModel> blogs = [];
 
@@ -339,12 +341,29 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
   //   });
   // }
 
+  //Update the grid_text to use translations
+  late List<String> grid_text;
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    // Update text based on current locale
+    final localizations = AppLocalizations.of(context)!;
+    grid_text = [
+      localizations.crop,
+      localizations.livestock,
+      localizations.ai,
+      localizations.training,
+    ];
+  }
+
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     double height = MediaQuery.of(context).size.height;
     double width = MediaQuery.of(context).size.width;
     final provider = Provider.of<UserProvider>(context);
+    final localizations = AppLocalizations.of(context)!;
 
     return Scaffold(
       backgroundColor: ColorsUtil.bgColor,
@@ -354,7 +373,7 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
         // leading:
         //     Container(), // Remove location display from AppBar as requested
         title: Text(
-          "Farmers Touch",
+          localizations.appTitle,
           style: theme.textTheme.titleLarge!.copyWith(letterSpacing: 1),
         ),
         // centerTitle: true,
@@ -372,6 +391,25 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
               Icons.shopping_cart_rounded,
               color: ColorsUtil.onPrimary,
             ),
+          ),
+          // Add a language selector button
+          PopupMenuButton<Locale>(
+            icon: Icon(Icons.language, color: ColorsUtil.onPrimary),
+            onSelected: (Locale locale) {
+              Provider.of<LanguageProvider>(context, listen: false)
+                  .changeLanguage(locale);
+            },
+            itemBuilder: (context) => [
+              PopupMenuItem(
+                value: Locale('en', ''),
+                child: Text('English'),
+              ),
+              PopupMenuItem(
+                value: Locale('te', ''),
+                child: Text('తెలుగు'),
+              ),
+              // Add more languages as needed
+            ],
           ),
           const SizedBox(width: 15),
         ],
@@ -412,18 +450,20 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
                                       Icons.cloud,
                                       size: 50,
                                     ),
-                              title: const Text("Today"),
+                              title: Text(
+                                localizations.today,
+                              ),
                               subtitle: Text(
                                 (weather != null)
                                     ? ("${weather!.weather![0].main ?? ""} : ${weather!.main!.tempMax.toString()}°C / ${weather!.main!.tempMin.toString()}°C")
-                                    : "Weather unavailable",
+                                    : localizations.weatherUnavailable,
                               ),
                               trailing: Container(
                                 height: 50,
                                 width: 100,
-                                child: Row(
-                                  mainAxisAlignment:
-                                      MainAxisAlignment.spaceBetween,
+                                child: Column(
+                                  // mainAxisAlignment:
+                                  //     MainAxisAlignment.spaceBetween,
                                   children: [
                                     Text(
                                       (weather != null)
@@ -463,11 +503,11 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
                               child: locationServicesDisabled
                                   ? ListTile(
                                       leading: const Icon(Icons.location_off),
-                                      title: const Text(
-                                          "Location services disabled"),
+                                      title: Text(localizations
+                                          .locationServicesDisabled),
                                       trailing: ElevatedButton(
                                         onPressed: _openAppSettings,
-                                        child: const Text("Enable"),
+                                        child: Text(localizations.enable),
                                         style: ElevatedButton.styleFrom(
                                           backgroundColor:
                                               ColorsUtil.primaryColor,
@@ -479,12 +519,12 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
                                       ? ListTile(
                                           leading: const Icon(
                                               Icons.location_disabled),
-                                          title: const Text(
-                                              "Location permission required"),
+                                          title: Text(localizations
+                                              .locationPermissionRequired),
                                           trailing: ElevatedButton(
                                             onPressed: () =>
                                                 getAddress(forceRefresh: true),
-                                            child: const Text("Allow"),
+                                            child: Text(localizations.allow),
                                             style: ElevatedButton.styleFrom(
                                               backgroundColor:
                                                   ColorsUtil.primaryColor,
@@ -494,10 +534,10 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
                                           ),
                                         )
                                       : fetchingLocationAgain
-                                          ? const ListTile(
+                                          ? ListTile(
                                               leading: Icon(Icons.refresh),
-                                              title:
-                                                  Text("Fetching location..."),
+                                              title: Text(localizations
+                                                  .fetchingLocation),
                                               trailing:
                                                   CircularProgressIndicator(),
                                             )
@@ -506,7 +546,8 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
                                                   const Icon(Icons.location_on),
                                               title: Text(cur_address != null
                                                   ? "${cur_address!.locality ?? ""}, ${cur_address!.postalCode ?? ""}"
-                                                  : "Location unknown"),
+                                                  : localizations
+                                                      .locationUnknown),
                                               trailing: IconButton(
                                                 icon: Icon(Icons.refresh),
                                                 onPressed: () => getAddress(
@@ -614,7 +655,7 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
                           isLoading = false;
                         });
                       }
-                    }),
+                    }, localizations.searchBlogs),
                   ),
                   const SizedBox(
                     height: 20,
@@ -622,7 +663,7 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
                   Row(
                     children: [
                       Text(
-                        "Blogs",
+                        localizations.blogs,
                         style: theme.textTheme.displayLarge,
                       ),
                     ],
@@ -729,7 +770,7 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
                                     .toList(),
                               ],
                             )
-                          : const Text("No blogs available")
+                          : Text(localizations.noBlogs)
                       : Shimmer.fromColors(
                           baseColor: const Color(0xFFF0F0F0),
                           highlightColor: const Color(0xFFE0E0E0),

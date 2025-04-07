@@ -1,0 +1,18 @@
+{
+  "appTitle": "ఫామర్స్ టచ్",
+  "crop": "పంట",
+  "livestock": "పశుసంపద",
+  "ai": "కృత్రిమ మేధ",
+  "training": "శిక్షణ",
+  "blogs": "బ్లాగులు",
+  "today": "నేడు",
+  "locationUnknown": "స్థానం తెలియదు",
+  "fetchingLocation": "స్థానాన్ని పొందుతోంది...",
+  "locationPermissionRequired": "స్థాన అనుమతి అవసరం",
+  "locationServicesDisabled": "స్థాన సేవలు నిలిపివేయబడ్డాయి",
+  "enable": "ప్రారంభించు",
+  "allow": "అనుమతించు",
+  "noBlogs": "బ్లాగులు అందుబాటులో లేవు",
+  "weatherUnavailable": "వాతావరణ సమాచారం అందుబాటులో లేదు",
+  "searchBlogs": "బ్లాగులు శోధించండి"
+}

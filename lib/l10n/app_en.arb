@@ -1,0 +1,18 @@
+{
+  "appTitle": "Farmers Touch",
+  "crop": "Crop",
+  "livestock": "Livestock",
+  "ai": "AI",
+  "training": "Training",
+  "blogs": "Blogs",
+  "today": "Today",
+  "locationUnknown": "Location unknown",
+  "fetchingLocation": "Fetching location...",
+  "locationPermissionRequired": "Location permission required",
+  "locationServicesDisabled": "Location services disabled",
+  "enable": "Enable",
+  "allow": "Allow",
+  "noBlogs": "No blogs available",
+  "weatherUnavailable": "Weather unavailable",  
+  "searchBlogs": "Search Blogs"
+}

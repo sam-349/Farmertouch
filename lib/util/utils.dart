@@ -2,7 +2,7 @@ import 'package:farmers_touch/colors.dart';
 import 'package:flutter/material.dart';
 
 class Reusable {
-  static Widget textField(callback) {
+  static Widget textField(callback, String text) {
     return TextField(
       decoration: InputDecoration(
         prefixIcon: Icon(Icons.search),
@@ -12,7 +12,7 @@ class Reusable {
         ),
         fillColor: ColorsUtil.onPrimary,
         filled: true,
-        hintText: "Search Blogs",
+        hintText: text,
         contentPadding: EdgeInsets.all(15),
       ),
       onChanged: callback,
